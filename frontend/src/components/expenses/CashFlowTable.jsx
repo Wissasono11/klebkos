@@ -150,7 +150,7 @@ export const CashFlowTable = () => {
             className="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs font-bold rounded-xl sm:rounded-full bg-brand-surface-2 hover:bg-brand-surface text-brand-text-main border border-brand-border flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 text-brand-text-muted shrink-0" strokeWidth={2.2} />
-            <span className="truncate">Tambah Pemasukan</span>
+            <span className="truncate">Catat Pemasukan</span>
           </button>
 
           <button
@@ -159,7 +159,7 @@ export const CashFlowTable = () => {
             className="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs font-bold rounded-xl sm:rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5 shrink-0" />
-            <span className="truncate">Tambah Pengeluaran</span>
+            <span className="truncate">Catat Pengeluaran</span>
           </button>
         </div>
       </div>
@@ -187,7 +187,7 @@ export const CashFlowTable = () => {
           <Receipt className="w-8 h-8 text-brand-text-muted mx-auto mb-2" />
           <p className="text-xs font-bold text-brand-text-main">Belum ada catatan kas untuk periode ini</p>
           <p className="text-[11px] text-brand-text-muted mt-0.5">
-            Gunakan tombol "Tambah Pemasukan" atau "Tambah Pengeluaran" di atas untuk mencatat transaksi.
+            Gunakan tombol "Catat Pemasukan" atau "Catat Pengeluaran" di atas untuk mencatat transaksi.
           </p>
         </div>
       ) : (

@@ -85,15 +85,6 @@ export const DashboardPage = () => {
             <Building className="w-3.5 h-3.5 text-brand-text-muted" strokeWidth={2} />
             <span>Kamar</span>
           </button>
-
-          <button
-            type="button"
-            onClick={openAddExpenseModal}
-            className="px-3.5 py-2 text-xs font-bold rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-white flex items-center gap-1.5 shadow-sm active:scale-[0.98] transition-all"
-          >
-            <Plus className="w-3.5 h-3.5" strokeWidth={2.2} />
-            <span>Catat Pengeluaran</span>
-          </button>
         </div>
       </div>
 

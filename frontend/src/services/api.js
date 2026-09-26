@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const DEFAULT_API_URL = 'https://klebkos-backend.bayuwicaksono782.workers.dev/api/v1';
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || DEFAULT_API_URL,
   headers: {
     'Content-Type': 'application/json'
   }

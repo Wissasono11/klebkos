@@ -2,31 +2,40 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DATA_FILE = path.resolve(__dirname, '../../data/incomes.json');
+let DATA_FILE = '';
+try {
+  if (typeof import.meta?.url === 'string' && import.meta.url.startsWith('file:')) {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    DATA_FILE = path.resolve(__dirname, '../../data/incomes.json');
+  }
+} catch (e) {}
+
+let inMemoryIncomes = [];
 
 export function readIncomes() {
+  if (!DATA_FILE) return inMemoryIncomes;
   try {
     if (!fs.existsSync(DATA_FILE)) {
       fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
       fs.writeFileSync(DATA_FILE, '[]', 'utf8');
-      return [];
+      return inMemoryIncomes;
     }
     const data = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(data) || [];
+    return JSON.parse(data) || inMemoryIncomes;
   } catch (err) {
-    console.error('Error reading incomes.json:', err.message);
-    return [];
+    return inMemoryIncomes;
   }
 }
 
 export function writeIncomes(incomes) {
+  inMemoryIncomes = incomes;
+  if (!DATA_FILE) return;
   try {
     fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
     fs.writeFileSync(DATA_FILE, JSON.stringify(incomes, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error writing incomes.json:', err.message);
+    // Cloudflare Workers has no persistent local disk
   }
 }
 

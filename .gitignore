@@ -11,10 +11,12 @@ node_modules/
 *.env
 *.local
 
+
 # Production Build Outputs
 dist/
 dist-ssr/
 build/
+.wrangler/
 *.tsbuildinfo
 
 # Logs & Debugging

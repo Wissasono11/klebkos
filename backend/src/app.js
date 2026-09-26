@@ -5,9 +5,27 @@ import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 
-// Middlewares
+// Allowed Origins for CORS (Lokal + Production Vercel)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: '*', // Diizinkan untuk development Vite / mobile
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (
+      !process.env.CLIENT_URL ||
+      process.env.CLIENT_URL === '*' ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app')
+    ) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Blocked by CORS policy: ${origin}`));
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

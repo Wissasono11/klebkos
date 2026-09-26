@@ -3,13 +3,21 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Muat .env jika di lingkungan lokal Node.js
+try {
+  if (typeof import.meta?.url === 'string' && import.meta.url.startsWith('file:')) {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+  }
+} catch (e) {
+  // Edge runtime ignores local file path
+}
 
-// Muat .env relatif terhadap lokasi folder backend/
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 if (!process.env.SUPABASE_URL) {
-  dotenv.config();
+  try {
+    dotenv.config();
+  } catch (e) {}
 }
 
 

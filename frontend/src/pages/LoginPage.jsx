@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useUIStore } from '../stores/useUIStore';
-import { Lock, Mail, ArrowRight, Eye, EyeOff, ShieldCheck, AlertCircle, Clock } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Eye, EyeOff, ShieldCheck, AlertCircle } from 'lucide-react';
 import klebenganLogo from '../assets/klebengan.png';
 
 gsap.registerPlugin(useGSAP);
@@ -11,7 +11,6 @@ gsap.registerPlugin(useGSAP);
 export const LoginPage = () => {
   const containerRef = useRef(null);
   const login = useAuthStore((state) => state.login);
-  const sessionExpiredReason = useAuthStore((state) => state.sessionExpiredReason);
   const setActiveTab = useUIStore((state) => state.setActiveTab);
   const addToast = useUIStore((state) => state.addToast);
 
@@ -76,19 +75,6 @@ export const LoginPage = () => {
             Sistem Pencatatan Kas & Tagihan Kos Klebengan
           </p>
         </div>
-
-        {/* Inactivity Session Notice Banner */}
-        {sessionExpiredReason === 'idle' && (
-          <div className="mb-5 p-3.5 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-start gap-2.5 text-xs text-amber-900 shadow-2xs">
-            <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-[12px]">Sesi Berakhir Otomatis</p>
-              <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
-                Anda telah keluar secara otomatis demi keamanan karena tidak ada aktivitas selama 15 menit. Silakan masuk kembali.
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Error Message Banner */}
         {errorMessage && (
@@ -190,14 +176,6 @@ export const LoginPage = () => {
             </button>
           </div>
         </form>
-
-        {/* Security & Idle Auto-Logout notice footer */}
-        <div className="mt-6 pt-4 border-t border-brand-border text-center">
-          <p className="text-[10px] text-brand-text-muted flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-3 h-3 text-emerald-600" />
-            <span>Sesi aman: Auto-logout otomatis aktif saat 15 menit tanpa aktivitas.</span>
-          </p>
-        </div>
       </div>
     </div>
   );

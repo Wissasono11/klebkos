@@ -11,7 +11,6 @@ import { useExpenseStore } from './stores/useExpenseStore';
 import { useIncomeStore } from './stores/useIncomeStore';
 
 import { useAuthStore } from './stores/useAuthStore';
-import { useIdleSession } from './hooks/useIdleSession';
 
 import { DashboardPage } from './pages/DashboardPage';
 import { RoomsPage } from './pages/RoomsPage';
@@ -28,9 +27,6 @@ export default function App() {
   const loadRoomData = useRoomStore((state) => state.loadRoomData);
   const loadExpenses = useExpenseStore((state) => state.loadExpenses);
   const loadIncomes = useIncomeStore((state) => state.loadIncomes);
-
-  // Monitor aktivitas pengguna untuk auto-logout saat idle (15 menit)
-  useIdleSession();
 
   // Load periode hanya jika pengguna sudah terautentikasi (login)
   useEffect(() => {

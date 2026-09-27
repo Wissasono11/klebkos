@@ -26,7 +26,14 @@ api.interceptors.request.use((config) => {
       config.baseURL = import.meta.env.VITE_API_URL;
     }
   }
-  const token = localStorage.getItem('supabase_access_token');
+  let token = localStorage.getItem('supabase_access_token');
+  if (!token) {
+    try {
+      const session = JSON.parse(localStorage.getItem('kaskos_auth_session') || '{}');
+      token = session?.token;
+    } catch (_) {}
+  }
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

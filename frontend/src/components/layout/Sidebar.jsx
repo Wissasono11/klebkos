@@ -22,6 +22,7 @@ export const Sidebar = () => {
   const addToast = useUIStore((state) => state.addToast);
 
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const role = useAuthStore((state) => state.role);
 
@@ -113,12 +114,28 @@ export const Sidebar = () => {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-brand-border bg-brand-surface-2/50">
+        <div className="p-4 border-t border-brand-border bg-brand-surface-2/50 space-y-3">
+          {isLoggedIn && (
+            <div className="flex items-center gap-2.5 px-1 py-1">
+              <div className="w-8 h-8 rounded-xl bg-brand-primary text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'BK'}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-brand-text-main truncate">
+                  {user?.name || 'Bendahara KlebKos'}
+                </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[10px] text-emerald-700 font-bold">Sesi Aktif</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {isLoggedIn ? (
             <button
               onClick={() => {
-                logout();
+                logout('manual');
                 setActiveTab('login');
                 addToast('Berhasil logout dari sesi bendahara.', 'info');
               }}

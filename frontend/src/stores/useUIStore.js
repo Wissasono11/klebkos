@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 
+const hasStoredSession = typeof window !== 'undefined' && Boolean(localStorage.getItem('kaskos_auth_session'));
+
 export const useUIStore = create((set, get) => ({
-  activeTab: 'dashboard',
+  activeTab: hasStoredSession ? 'dashboard' : 'login',
   isSidebarOpen: false,
   isLoginModalOpen: false,
   isUploadModalOpen: false,

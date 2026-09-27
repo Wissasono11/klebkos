@@ -10,6 +10,9 @@ import { useRoomStore } from './stores/useRoomStore';
 import { useExpenseStore } from './stores/useExpenseStore';
 import { useIncomeStore } from './stores/useIncomeStore';
 
+import { useAuthStore } from './stores/useAuthStore';
+import { useIdleSession } from './hooks/useIdleSession';
+
 import { DashboardPage } from './pages/DashboardPage';
 import { RoomsPage } from './pages/RoomsPage';
 import { VerificationPage } from './pages/VerificationPage';
@@ -19,25 +22,34 @@ import { LoginPage } from './pages/LoginPage';
 
 export default function App() {
   const activeTab = useUIStore((state) => state.activeTab);
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
   const loadPeriods = usePeriodStore((state) => state.loadPeriods);
   const loadRoomData = useRoomStore((state) => state.loadRoomData);
   const loadExpenses = useExpenseStore((state) => state.loadExpenses);
   const loadIncomes = useIncomeStore((state) => state.loadIncomes);
 
-  // Initialize periods on mount
-  useEffect(() => {
-    loadPeriods();
-  }, [loadPeriods]);
+  // Monitor aktivitas pengguna untuk auto-logout saat idle (15 menit)
+  useIdleSession();
 
-  // Load rooms, expenses, and manual incomes whenever active period changes
+  // Load periode hanya jika pengguna sudah terautentikasi (login)
   useEffect(() => {
-    loadRoomData(currentPeriodId);
-    loadExpenses(currentPeriodId);
-    loadIncomes(currentPeriodId);
-  }, [currentPeriodId, loadRoomData, loadExpenses, loadIncomes]);
+    if (isLoggedIn) {
+      loadPeriods();
+    }
+  }, [isLoggedIn, loadPeriods]);
 
-  if (activeTab === 'login') {
+  // Load data kamar, pengeluaran, dan pemasukan hanya jika login dan periode aktif tersedia
+  useEffect(() => {
+    if (isLoggedIn && currentPeriodId) {
+      loadRoomData(currentPeriodId);
+      loadExpenses(currentPeriodId);
+      loadIncomes(currentPeriodId);
+    }
+  }, [isLoggedIn, currentPeriodId, loadRoomData, loadExpenses, loadIncomes]);
+
+  // Route Guard: Tampilkan Form Login jika belum login atau jika tab aktif adalah login
+  if (!isLoggedIn || activeTab === 'login') {
     return (
       <div className="min-h-screen w-screen bg-brand-bg text-brand-text-main font-sans selection:bg-brand-primary-subtle selection:text-brand-primary flex flex-col justify-center items-center">
         <LoginPage />

@@ -9,10 +9,15 @@ async function resetDatabase() {
   }
 
   try {
-    // 1. Hapus catatan pengeluaran
+    // 1. Hapus catatan pengeluaran & pemasukan
     const { error: expErr } = await supabaseAdmin.from('expenses').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     if (expErr) throw expErr;
     console.log('✅ Data expenses berhasil dikosongkan.');
+
+    try {
+      const { error: incErr } = await supabaseAdmin.from('incomes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (!incErr) console.log('✅ Data incomes berhasil dikosongkan.');
+    } catch (_) {}
 
     // 2. Hapus transaksi & antrean pembayaran
     const { error: payErr } = await supabaseAdmin.from('payments').delete().neq('id', '00000000-0000-0000-0000-000000000000');

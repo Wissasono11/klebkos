@@ -1,4 +1,4 @@
-import { Menu, ChevronDown, ChevronLeft, ChevronRight, Share2, Calendar, Moon, Trash2, LogOut } from 'lucide-react';
+import { Menu, ChevronDown, ChevronLeft, ChevronRight, Share2, Calendar, Moon, Trash2 } from 'lucide-react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { usePeriodStore } from '../../stores/usePeriodStore';
@@ -13,7 +13,6 @@ export const TopHeader = () => {
   const openWARekapModal = useUIStore((state) => state.openWARekapModal);
   const addToast = useUIStore((state) => state.addToast);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
-  const logout = useAuthStore((state) => state.logout);
 
   const periods = usePeriodStore((state) => state.periods);
   const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
@@ -166,22 +165,6 @@ export const TopHeader = () => {
           <Share2 className="w-3.5 h-3.5 text-emerald-200 shrink-0" strokeWidth={2} />
           <span className="hidden sm:inline">Salin Rekap WA</span>
         </button>
-
-        {/* Quick Logout Button */}
-        {isLoggedIn && (
-          <button
-            type="button"
-            onClick={() => {
-              logout('manual');
-              addToast('Berhasil logout dari sesi bendahara.', 'info');
-            }}
-            title="Keluar dari Dashboard"
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-brand-border hover:border-rose-200 rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Logout</span>
-          </button>
-        )}
       </div>
     </header>
   );

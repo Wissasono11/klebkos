@@ -67,38 +67,38 @@ export const TopHeader = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#f9f8f5]/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 bg-[#f9f8f5]/90 backdrop-blur-md border-b border-brand-border px-2.5 sm:px-4 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-1.5 sm:gap-4">
       {/* Left: Mobile Nav & Executive Period Switcher */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
+      <div className="flex items-center gap-1 sm:gap-2.5 min-w-0">
         <button
           onClick={toggleSidebar}
-          className="lg:hidden p-2 text-brand-text-main bg-white border border-brand-border rounded-xl shadow-2xs hover:bg-brand-surface-2 transition-colors cursor-pointer"
+          className="lg:hidden p-2 text-brand-text-main bg-white border border-brand-border rounded-xl shadow-2xs hover:bg-brand-surface-2 transition-colors cursor-pointer shrink-0"
           aria-label="Buka menu navigasi"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         {/* Executive Period Selector Group */}
-        <div className="flex items-center gap-1 sm:gap-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
           {/* Quick Prev Month Button */}
           <button
             type="button"
             onClick={goToPrevPeriod}
             title="Pindah ke bulan sebelumnya"
-            className="p-2 text-brand-text-muted hover:text-brand-text-main bg-white hover:bg-brand-surface-2 border border-brand-border rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer"
+            className="p-2 text-brand-text-muted hover:text-brand-text-main bg-white hover:bg-brand-surface-2 border border-brand-border rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
           {/* Period Dropdown Select */}
-          <div className="relative min-w-[175px] sm:min-w-[215px]">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center text-brand-primary">
+          <div className="relative min-w-[125px] sm:min-w-[215px]">
+            <div className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center text-brand-primary">
               <Calendar className="w-3.5 h-3.5" strokeWidth={2.2} />
             </div>
             <select
               value={currentPeriodId || ''}
               onChange={(e) => setCurrentPeriodId(e.target.value)}
-              className="w-full appearance-none bg-white border border-brand-border text-brand-text-main text-xs font-bold rounded-xl pl-9 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 shadow-2xs cursor-pointer hover:border-brand-border-strong transition-colors"
+              className="w-full appearance-none bg-white border border-brand-border text-brand-text-main text-xs font-bold rounded-xl pl-8 sm:pl-9 pr-6 sm:pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 shadow-2xs cursor-pointer hover:border-brand-border-strong transition-colors truncate"
             >
               {periods.length === 0 ? (
                 <option value="">Memuat periode...</option>
@@ -116,7 +116,7 @@ export const TopHeader = () => {
                 })
               )}
             </select>
-            <ChevronDown className="w-3.5 h-3.5 text-brand-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="w-3.5 h-3.5 text-brand-text-muted absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
           {/* Quick Next Month Button */}
@@ -124,7 +124,7 @@ export const TopHeader = () => {
             type="button"
             onClick={goToNextPeriod}
             title="Pindah ke bulan berikutnya"
-            className="p-2 text-brand-text-muted hover:text-brand-text-main bg-white hover:bg-brand-surface-2 border border-brand-border rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer"
+            className="p-2 text-brand-text-muted hover:text-brand-text-main bg-white hover:bg-brand-surface-2 border border-brand-border rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
           >
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
@@ -134,10 +134,10 @@ export const TopHeader = () => {
             type="button"
             onClick={() => setIsAddPeriodModalOpen(true)}
             title="Buka atau buat periode kas bulan baru"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-brand-text-main hover:text-brand-primary bg-white hover:bg-brand-surface-2 border border-brand-border hover:border-brand-primary/30 rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold text-brand-text-main hover:text-brand-primary bg-white hover:bg-brand-surface-2 border border-brand-border hover:border-brand-primary/30 rounded-xl transition-all shadow-2xs active:scale-95 cursor-pointer shrink-0"
           >
-            <Moon className="w-3.5 h-3.5 text-brand-primary" strokeWidth={2.2} />
-            <span>Bulan</span>
+            <Moon className="w-3.5 h-3.5 text-brand-primary shrink-0" strokeWidth={2.2} />
+            <span className="inline">Bulan</span>
           </button>
 
           {/* Delete Period Button */}

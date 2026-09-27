@@ -26,7 +26,7 @@ api.interceptors.request.use((config) => {
       config.baseURL = import.meta.env.VITE_API_URL;
     }
   }
-  const token = localStorage.getItem('supabase_access_token') || 'demo-bendahara-token';
+  const token = localStorage.getItem('supabase_access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

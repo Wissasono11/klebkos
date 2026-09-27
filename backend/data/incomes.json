@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "37b20650-6a21-47ab-aea7-e2f1f98f9c27",
+    "period_id": "c7208398-363f-4fb2-b266-0d226792f9e4",
+    "title": "iuran total bulan september",
+    "category": "Iuran Manual",
+    "amount": 571082,
+    "income_date": "2026-09-20",
+    "notes": "",
+    "created_by": null,
+    "created_at": "2026-09-27T03:45:33.003086+00:00"
+  }
+]

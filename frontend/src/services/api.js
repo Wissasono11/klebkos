@@ -40,4 +40,28 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Fallback otomatis: jika server backend lokal port 5000 belum menyala atau offline, alihkan ke Cloudflare Workers
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    const isNetworkError =
+      error.message === 'Network Error' ||
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ECONNREFUSED';
+
+    if (
+      !originalRequest?._retry &&
+      isNetworkError &&
+      originalRequest?.baseURL &&
+      originalRequest.baseURL.includes('localhost:5000')
+    ) {
+      originalRequest._retry = true;
+      originalRequest.baseURL = PROD_API_URL;
+      return api(originalRequest);
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

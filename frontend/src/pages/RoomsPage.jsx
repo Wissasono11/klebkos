@@ -1,15 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { SearchFilterBar } from '../components/rooms/SearchFilterBar';
 import { RoomGrid } from '../components/rooms/RoomGrid';
 import { AdvancePaymentModal } from '../components/rooms/AdvancePaymentModal';
 import { TenantEditModal } from '../components/rooms/TenantEditModal';
+import { useRoomStore } from '../stores/useRoomStore';
+import { usePeriodStore } from '../stores/usePeriodStore';
 
 gsap.registerPlugin(useGSAP);
 
 export const RoomsPage = () => {
   const pageRef = useRef(null);
+  const loadRoomData = useRoomStore((state) => state.loadRoomData);
+  const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
+
+  // Pastikan data kamar dimuat segera saat halaman kamar dibuka
+  useEffect(() => {
+    loadRoomData(currentPeriodId);
+  }, [currentPeriodId, loadRoomData]);
 
   useGSAP(() => {
     gsap.from('.rooms-section', {

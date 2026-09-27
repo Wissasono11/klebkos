@@ -9,16 +9,19 @@ import {
   rejectProofAPI
 } from '../services/roomService';
 import { usePeriodStore } from './usePeriodStore';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 const getInitialFloors = () => {
   try {
     const saved = localStorage.getItem('kaskos_active_floors');
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(Number).filter((n) => [1, 2, 3, 4].includes(n));
+      }
     }
   } catch (e) {}
-  return [1]; // Default hanya Lantai 1 aktif; Lantai 2, 3, 4 tersedia di opsi Aktifkan
+  return [1, 2, 3, 4]; // Default seluruh lantai 1-4 aktif
 };
 
 export const useRoomStore = create((set, get) => ({
@@ -29,6 +32,7 @@ export const useRoomStore = create((set, get) => ({
   searchQuery: '',
   selectedRoomForAdvance: null,
   selectedRoomForEdit: null,
+  isLoading: false,
 
   setFilterStatus: (status) => set({ filterStatus: status }),
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -40,10 +44,10 @@ export const useRoomStore = create((set, get) => ({
     const { activeFloors } = get();
     const num = Number(floorNumber);
     if (![1, 2, 3, 4].includes(num)) return false;
-    if (activeFloors.includes(num)) return false;
+    if (activeFloors.map(Number).includes(num)) return false;
     if (activeFloors.length >= 4) return false;
 
-    const newFloors = [...activeFloors, num].sort((a, b) => a - b);
+    const newFloors = [...activeFloors.map(Number), num].sort((a, b) => a - b);
     set({ activeFloors: newFloors });
     try {
       localStorage.setItem('kaskos_active_floors', JSON.stringify(newFloors));
@@ -54,10 +58,10 @@ export const useRoomStore = create((set, get) => ({
   removeFloor: (floorNumber) => {
     const { activeFloors } = get();
     const num = Number(floorNumber);
-    if (!activeFloors.includes(num)) return false;
+    if (!activeFloors.map(Number).includes(num)) return false;
     if (activeFloors.length <= 1) return false;
 
-    const newFloors = activeFloors.filter((f) => f !== num);
+    const newFloors = activeFloors.map(Number).filter((f) => f !== num);
     set({ activeFloors: newFloors });
     try {
       localStorage.setItem('kaskos_active_floors', JSON.stringify(newFloors));
@@ -65,36 +69,68 @@ export const useRoomStore = create((set, get) => ({
     return true;
   },
 
-  isLoading: false,
-
   // Load rooms and payments from Backend / Supabase
   loadRoomData: async (periodId) => {
     set({ isLoading: true });
+
     try {
       const data = await fetchRoomsAPI(periodId);
-      if (data && Array.isArray(data.rooms)) {
+      if (data && Array.isArray(data.rooms) && data.rooms.length > 0) {
         const normalizedPayments = (data.payments || []).map((p) => ({
           ...p,
           status: p.status || p.payment_status || (p.is_paid ? 'paid' : 'unpaid')
         }));
         set({
-          rooms: data.rooms,
+          rooms: data.rooms.map((r) => ({ ...r, floor_number: Number(r.floor_number) })),
           payments: normalizedPayments,
           isLoading: false
         });
-      } else {
-        set({ isLoading: false });
+        return;
       }
     } catch (err) {
-      console.warn('Backend rooms offline:', err.message);
-      set({ isLoading: false });
+      console.warn('Backend rooms API error, mencoba direct Supabase:', err.message);
     }
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data: dbRooms, error: rErr } = await supabase
+          .from('rooms')
+          .select('*')
+          .order('floor_number', { ascending: true })
+          .order('room_number', { ascending: true });
+
+        if (!rErr && Array.isArray(dbRooms) && dbRooms.length > 0) {
+          let dbPayments = [];
+          if (periodId) {
+            const { data: pData } = await supabase
+              .from('payments')
+              .select('*')
+              .eq('period_id', periodId);
+            dbPayments = (pData || []).map((p) => ({
+              ...p,
+              status: p.payment_status || p.status || (p.is_paid ? 'paid' : 'unpaid')
+            }));
+          }
+          set({
+            rooms: dbRooms.map((r) => ({ ...r, floor_number: Number(r.floor_number) })),
+            payments: dbPayments,
+            isLoading: false
+          });
+          return;
+        }
+      } catch (dbErr) {
+        console.warn('Direct Supabase rooms query error:', dbErr.message);
+      }
+    }
+
+    set({ isLoading: false });
   },
 
   // Toggle single payment 1 month
-  toggleRoomPayment: async (roomId, periodId = 'b8569bcd-90d5-44dd-8e6e-8dafb358abd2') => {
+  toggleRoomPayment: async (roomId, periodId) => {
+    const activePid = periodId || usePeriodStore.getState().currentPeriodId;
     const { payments } = get();
-    const existing = payments.find((p) => p.room_id === roomId && p.period_id === periodId);
+    const existing = payments.find((p) => p.room_id === roomId && p.period_id === activePid);
     const nextPaid = existing ? !existing.is_paid : true;
 
     if (existing) {
@@ -114,7 +150,7 @@ export const useRoomStore = create((set, get) => ({
     } else {
       const newPay = {
         id: `pay-${Date.now()}`,
-        period_id: periodId,
+        period_id: activePid,
         room_id: roomId,
         is_paid: true,
         status: 'paid',
@@ -127,7 +163,7 @@ export const useRoomStore = create((set, get) => ({
     }
 
     try {
-      await updatePaymentStatusAPI(roomId, periodId, nextPaid);
+      await updatePaymentStatusAPI(roomId, activePid, nextPaid);
       usePeriodStore.getState().loadPeriods();
     } catch (err) {
       console.warn('Gagal sinkronisasi status pembayaran ke backend:', err.message);
@@ -136,7 +172,7 @@ export const useRoomStore = create((set, get) => ({
     return nextPaid;
   },
 
-  // Multi-Month / Advance Payment Feature v5
+  // Multi-Month / Advance Payment Feature
   payMultiMonths: async (roomId, currentPeriodId, numberOfMonths = 2) => {
     const { rooms, payments } = get();
     const room = rooms.find((r) => r.id === roomId);
@@ -145,10 +181,8 @@ export const useRoomStore = create((set, get) => ({
     const monthlyFee = 50000;
     const totalAmount = numberOfMonths * monthlyFee;
 
-    // 1. Current period payment
     const currentPay = payments.find((p) => p.room_id === roomId && p.period_id === currentPeriodId);
     const updatedPayments = [...payments];
-
     const noteText = `Lunas ${numberOfMonths} bulan sekaligus (Total Rp ${totalAmount.toLocaleString('id-ID')})`;
 
     if (currentPay) {

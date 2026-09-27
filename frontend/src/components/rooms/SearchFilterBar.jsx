@@ -16,8 +16,8 @@ export const SearchFilterBar = () => {
 
   const activePayments = payments.filter((p) => p.period_id === currentPeriodId);
 
-  // Rooms belonging to active floors only
-  const activeRooms = rooms.filter((r) => activeFloors.includes(r.floor_number));
+  // Rooms belonging to active floors only (type-safe comparison)
+  const activeRooms = rooms.filter((r) => activeFloors.map(Number).includes(Number(r.floor_number)));
 
   // Counts
   const totalRooms = activeRooms.length;

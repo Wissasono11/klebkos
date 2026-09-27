@@ -23,7 +23,7 @@ export const RoomGrid = () => {
   const activePayments = payments.filter((p) => p.period_id === currentPeriodId);
 
   // Available floors that can be added (Max 4 floors: 1, 2, 3, 4)
-  const availableFloors = [1, 2, 3, 4].filter((f) => !activeFloors.includes(f));
+  const availableFloors = [1, 2, 3, 4].filter((f) => !activeFloors.map(Number).includes(f));
 
   const handleAddFloor = (floorNum) => {
     if (!isLoggedIn) {
@@ -31,7 +31,7 @@ export const RoomGrid = () => {
       openLoginModal();
       return;
     }
-    const success = addFloor(floorNum);
+    const success = addFloor(Number(floorNum));
     if (success) {
       addToast(`Lantai ${floorNum} berhasil ditambahkan ke pencatatan kas kos.`, 'success');
     }
@@ -47,12 +47,12 @@ export const RoomGrid = () => {
       addToast('Minimal harus ada 1 lantai aktif dipantau.', 'warning');
       return;
     }
-    removeFloor(floorNum);
+    removeFloor(Number(floorNum));
     addToast(`Lantai ${floorNum} dinonaktifkan dari tampilan pencatatan.`, 'info');
   };
 
-  // Only consider rooms on ACTIVE floors
-  const activeFloorRooms = rooms.filter((r) => activeFloors.includes(r.floor_number));
+  // Only consider rooms on ACTIVE floors (type-safe comparison)
+  const activeFloorRooms = rooms.filter((r) => activeFloors.map(Number).includes(Number(r.floor_number)));
 
   // Filter logic
   const filteredRooms = activeFloorRooms.filter((room) => {
@@ -145,12 +145,12 @@ export const RoomGrid = () => {
         </div>
       ) : (
         /* Floor sections */
-        activeFloors.map((floorNum) => {
-          const floorRooms = filteredRooms.filter((r) => r.floor_number === floorNum);
+        activeFloors.map(Number).map((floorNum) => {
+          const floorRooms = filteredRooms.filter((r) => Number(r.floor_number) === Number(floorNum));
           if (floorRooms.length === 0 && searchQuery) return null;
 
           const allFloorRooms = rooms.filter(
-            (r) => r.floor_number === floorNum && r.is_occupied
+            (r) => Number(r.floor_number) === Number(floorNum) && r.is_occupied
           );
           const paidFloorRooms = allFloorRooms.filter((r) =>
             activePayments.some((p) => p.room_id === r.id && p.is_paid)

@@ -28,14 +28,15 @@ export default function App() {
   const loadExpenses = useExpenseStore((state) => state.loadExpenses);
   const loadIncomes = useIncomeStore((state) => state.loadIncomes);
 
-  // Load periode hanya jika pengguna sudah terautentikasi (login)
+  // Load initial data (periode & kamar) segera saat login
   useEffect(() => {
     if (isLoggedIn) {
       loadPeriods();
+      loadRoomData(currentPeriodId);
     }
-  }, [isLoggedIn, loadPeriods]);
+  }, [isLoggedIn, loadPeriods, loadRoomData]);
 
-  // Load data kamar, pengeluaran, dan pemasukan hanya jika login dan periode aktif tersedia
+  // Load ulang data kamar, pengeluaran, dan pemasukan setiap kali periode aktif berganti
   useEffect(() => {
     if (isLoggedIn && currentPeriodId) {
       loadRoomData(currentPeriodId);

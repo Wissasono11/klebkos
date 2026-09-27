@@ -24,8 +24,20 @@ async function getPeriodsWithCarryover() {
     .from('expenses')
     .select('period_id, amount');
 
-  // 4. Ambil seluruh pemasukan manual
-  const allManualIncomes = readIncomes();
+  // 4. Ambil seluruh pemasukan manual dari Supabase Database (Tabel 'incomes')
+  let allManualIncomes = [];
+  try {
+    const { data: dbIncomes, error: incErr } = await supabaseAdmin
+      .from('incomes')
+      .select('period_id, amount');
+    if (!incErr && Array.isArray(dbIncomes)) {
+      allManualIncomes = dbIncomes;
+    } else {
+      allManualIncomes = readIncomes();
+    }
+  } catch (_) {
+    allManualIncomes = readIncomes();
+  }
 
   // 5. Hitung carryover akumulatif dari bulan ke bulan
   let runningBalance = Number(rawPeriods[0]?.starting_balance) || 0;

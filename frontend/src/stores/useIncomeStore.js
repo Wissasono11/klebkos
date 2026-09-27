@@ -22,14 +22,31 @@ export const useIncomeStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await fetchIncomesAPI(periodId);
-      if (response && Array.isArray(response.data)) {
+      if (response && Array.isArray(response.data) && response.data.length > 0) {
         set({
           incomes: response.data,
           isLoading: false
         });
         return;
       }
-      set({ isLoading: false });
+
+      // Jika response API kosong, lakukan pengecekan ke Supabase langsung
+      if (isSupabaseConfigured && supabase) {
+        try {
+          let query = supabase.from('incomes').select('*').order('income_date', { ascending: false });
+          if (periodId) query = query.eq('period_id', periodId);
+          const { data, error } = await query;
+          if (!error && Array.isArray(data) && data.length > 0) {
+            set({ incomes: data, isLoading: false });
+            return;
+          }
+        } catch (_) {}
+      }
+
+      set({
+        incomes: response && Array.isArray(response.data) ? response.data : [],
+        isLoading: false
+      });
     } catch (err) {
       console.warn('Backend API error loading incomes, checking Supabase direct:', err.message);
       // Direct Supabase fallback
@@ -69,6 +86,7 @@ export const useIncomeStore = create((set, get) => ({
           incomes: state.incomes.map((i) => (i.id === tempId ? res.data : i))
         }));
       }
+      await get().loadIncomes(newIncome.period_id);
       usePeriodStore.getState().loadPeriods();
     } catch (err) {
       console.warn('Gagal menyimpan pemasukan manual ke backend, mencoba direct Supabase:', err.message);
@@ -86,6 +104,8 @@ export const useIncomeStore = create((set, get) => ({
             set((state) => ({
               incomes: state.incomes.map((i) => (i.id === tempId ? data : i))
             }));
+            await get().loadIncomes(newIncome.period_id);
+            usePeriodStore.getState().loadPeriods();
           }
         } catch (_) {}
       }
@@ -107,12 +127,17 @@ export const useIncomeStore = create((set, get) => ({
 
     try {
       await updateIncomeAPI(id, updatedData);
+      const activePeriodId = usePeriodStore.getState().currentPeriodId;
+      await get().loadIncomes(activePeriodId);
       usePeriodStore.getState().loadPeriods();
     } catch (err) {
       console.warn('Gagal update pemasukan di backend, mencoba direct Supabase:', err.message);
       if (isSupabaseConfigured && supabase) {
         try {
           await supabase.from('incomes').update(updatedData).eq('id', id);
+          const activePeriodId = usePeriodStore.getState().currentPeriodId;
+          await get().loadIncomes(activePeriodId);
+          usePeriodStore.getState().loadPeriods();
         } catch (_) {}
       }
     }
@@ -126,12 +151,17 @@ export const useIncomeStore = create((set, get) => ({
 
     try {
       await deleteIncomeAPI(id);
+      const activePeriodId = usePeriodStore.getState().currentPeriodId;
+      await get().loadIncomes(activePeriodId);
       usePeriodStore.getState().loadPeriods();
     } catch (err) {
       console.warn('Gagal hapus pemasukan di backend, mencoba direct Supabase:', err.message);
       if (isSupabaseConfigured && supabase) {
         try {
           await supabase.from('incomes').delete().eq('id', id);
+          const activePeriodId = usePeriodStore.getState().currentPeriodId;
+          await get().loadIncomes(activePeriodId);
+          usePeriodStore.getState().loadPeriods();
         } catch (_) {}
       }
     }

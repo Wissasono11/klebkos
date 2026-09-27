@@ -7,7 +7,7 @@ const getBaseURL = () => {
   if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
     return 'http://localhost:5000/api/v1';
   }
-  return import.meta.env.VITE_API_URL || PROD_API_URL;
+  return import.meta?.env?.VITE_API_URL || PROD_API_URL;
 };
 
 export const api = axios.create({
@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       config.baseURL = 'http://localhost:5000/api/v1';
-    } else if (import.meta.env.VITE_API_URL) {
+    } else if (import.meta?.env?.VITE_API_URL) {
       config.baseURL = import.meta.env.VITE_API_URL;
     }
   }

@@ -75,7 +75,8 @@ export const AddPeriodModal = () => {
       addToast(`Periode ${MONTHS[monthNum - 1].name} ${yearNum} berhasil dibuka!`, 'success');
       setIsAddPeriodModalOpen(false);
     } catch (err) {
-      addToast(`Gagal membuka periode: ${err.message}`, 'error');
+      const errMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Terjadi kesalahan sistem';
+      addToast(`Gagal membuka periode: ${errMsg}`, 'error');
     } finally {
       setIsSubmitting(false);
     }

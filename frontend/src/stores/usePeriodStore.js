@@ -49,13 +49,8 @@ export const usePeriodStore = create((set, get) => ({
       const res = await createPeriodAPI(periodData);
       if (res && res.data) {
         const newPeriod = res.data;
-        const exists = get().periods.some((p) => p.id === newPeriod.id);
-        const updatedPeriods = exists
-          ? get().periods.map((p) => (p.id === newPeriod.id ? newPeriod : p))
-          : [newPeriod, ...get().periods];
-
+        await get().loadPeriods();
         set({
-          periods: updatedPeriods,
           currentPeriodId: newPeriod.id,
           isLoading: false
         });

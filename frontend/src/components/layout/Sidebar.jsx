@@ -8,12 +8,10 @@ import {
   X,
   LogOut,
   LogIn,
-  Moon
 } from 'lucide-react';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useRoomStore } from '../../stores/useRoomStore';
-import { usePeriodStore } from '../../stores/usePeriodStore';
 import klebenganLogo from '../../assets/klebengan.png';
 
 export const Sidebar = () => {
@@ -30,7 +28,6 @@ export const Sidebar = () => {
 
   const payments = useRoomStore((state) => state.payments);
   const pendingCount = payments.filter((p) => p.status === 'pending_verification').length;
-  const setIsAddPeriodModalOpen = usePeriodStore((state) => state.setIsAddPeriodModalOpen);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard Utama', icon: MdOutlineSpaceDashboard },
@@ -114,21 +111,6 @@ export const Sidebar = () => {
               );
             })}
           </nav>
-
-          {/* Shortcut Buka Periode Baru */}
-          <div className="px-4 pb-2">
-            <button
-              type="button"
-              onClick={() => {
-                closeSidebar();
-                setIsAddPeriodModalOpen(true);
-              }}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-brand-primary bg-brand-primary-subtle hover:bg-brand-primary hover:text-white border border-brand-primary/20 transition-all shadow-2xs cursor-pointer active:scale-95"
-            >
-              <Moon className="w-4 h-4 shrink-0" strokeWidth={2.2} />
-              <span>Buka Periode Baru</span>
-            </button>
-          </div>
         </div>
 
         {/* Sidebar Footer */}

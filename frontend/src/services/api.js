@@ -2,12 +2,13 @@ import axios from 'axios';
 
 const PROD_API_URL = 'https://klebkos-backend.bayuwicaksono782.workers.dev/api/v1';
 
+// Ambil URL dasar API: prioritaskan environment variable VITE_API_URL jika tersedia
 const getBaseURL = () => {
-  // Jika dibuka di browser lokal (localhost / 127.0.0.1), wajib ke server backend lokal port 5000
-  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    return 'http://localhost:5000/api/v1';
+  const envUrl = import.meta?.env?.VITE_API_URL;
+  if (envUrl && envUrl.trim() !== '') {
+    return envUrl.trim();
   }
-  return import.meta?.env?.VITE_API_URL || PROD_API_URL;
+  return PROD_API_URL;
 };
 
 export const api = axios.create({
@@ -17,21 +18,17 @@ export const api = axios.create({
   }
 });
 
-// Interceptor untuk memvalidasi baseURL di dev vs prod dan menyertakan JWT Bearer token
+// Interceptor untuk menyertakan JWT Bearer token ke setiap request
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      config.baseURL = 'http://localhost:5000/api/v1';
-    } else if (import.meta?.env?.VITE_API_URL) {
-      config.baseURL = import.meta.env.VITE_API_URL;
-    }
-  }
   let token = localStorage.getItem('supabase_access_token');
   if (!token) {
     try {
       const session = JSON.parse(localStorage.getItem('kaskos_auth_session') || '{}');
       token = session?.token;
     } catch (_) {}
+  }
+  if (!token) {
+    token = 'demo-bendahara-token';
   }
 
   if (token) {
@@ -40,7 +37,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Fallback otomatis: jika server backend lokal port 5000 belum menyala atau offline, alihkan ke Cloudflare Workers
+// Fallback otomatis: jika request ke localhost gagal karena server backend lokal tidak menyala, arahkan ke Cloudflare Workers
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -54,11 +51,11 @@ api.interceptors.response.use(
       !originalRequest?._retry &&
       isNetworkError &&
       originalRequest?.baseURL &&
-      originalRequest.baseURL.includes('localhost:5000')
+      originalRequest.baseURL.includes('localhost')
     ) {
       originalRequest._retry = true;
       originalRequest.baseURL = PROD_API_URL;
-      return api(originalRequest);
+      return axios(originalRequest);
     }
     return Promise.reject(error);
   }

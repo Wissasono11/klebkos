@@ -19,49 +19,35 @@ export const useIncomeStore = create((set, get) => ({
 
   // Load manual incomes from Backend or direct Supabase fallback
   loadIncomes: async (periodId) => {
+    const querySupabaseDirect = async () => {
+      if (!isSupabaseConfigured || !supabase) return null;
+      try {
+        let query = supabase.from('incomes').select('*').order('income_date', { ascending: false });
+        if (periodId) query = query.eq('period_id', periodId);
+        const { data, error } = await query;
+        if (!error && Array.isArray(data) && data.length > 0) return data;
+      } catch (_) {}
+      return null;
+    };
+
     set({ isLoading: true });
     try {
       const response = await fetchIncomesAPI(periodId);
       if (response && Array.isArray(response.data) && response.data.length > 0) {
-        set({
-          incomes: response.data,
-          isLoading: false
-        });
+        set({ incomes: response.data, isLoading: false });
         return;
       }
 
-      // Jika response API kosong, lakukan pengecekan ke Supabase langsung
-      if (isSupabaseConfigured && supabase) {
-        try {
-          let query = supabase.from('incomes').select('*').order('income_date', { ascending: false });
-          if (periodId) query = query.eq('period_id', periodId);
-          const { data, error } = await query;
-          if (!error && Array.isArray(data) && data.length > 0) {
-            set({ incomes: data, isLoading: false });
-            return;
-          }
-        } catch (_) {}
-      }
-
+      // API kosong — cek Supabase langsung
+      const directData = await querySupabaseDirect();
       set({
-        incomes: response && Array.isArray(response.data) ? response.data : [],
+        incomes: directData || (response && Array.isArray(response.data) ? response.data : []),
         isLoading: false
       });
     } catch (err) {
       console.warn('Backend API error loading incomes, checking Supabase direct:', err.message);
-      // Direct Supabase fallback
-      if (isSupabaseConfigured && supabase) {
-        try {
-          let query = supabase.from('incomes').select('*').order('income_date', { ascending: false });
-          if (periodId) query = query.eq('period_id', periodId);
-          const { data, error } = await query;
-          if (!error && Array.isArray(data)) {
-            set({ incomes: data, isLoading: false });
-            return;
-          }
-        } catch (_) {}
-      }
-      set({ isLoading: false });
+      const directData = await querySupabaseDirect();
+      set({ incomes: directData || [], isLoading: false });
     }
   },
 

@@ -14,15 +14,22 @@ import { usePeriodStore } from '../../stores/usePeriodStore';
 import { useExpenseStore } from '../../stores/useExpenseStore';
 import { useIncomeStore } from '../../stores/useIncomeStore';
 import { formatRupiah, formatDate } from '../../utils/formatters';
+import { FinancialSummaryHeroSkeleton } from './DashboardSkeleton';
 
 export const FinancialSummaryHero = () => {
   const currentPeriod = usePeriodStore((state) => state.getCurrentPeriod());
   const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
+  const periodsLoading = usePeriodStore((state) => state.isLoading);
   const rooms = useRoomStore((state) => state.rooms);
   const payments = useRoomStore((state) => state.payments);
+  const roomsLoading = useRoomStore((state) => state.isLoading);
   const expenses = useExpenseStore((state) => state.expenses);
   const incomes = useIncomeStore((state) => state.incomes);
   const activeFloors = useRoomStore((state) => state.activeFloors);
+
+  if (roomsLoading || periodsLoading || !currentPeriodId) {
+    return <FinancialSummaryHeroSkeleton />;
+  }
 
   // Filter for active period & active floors
   const activeFloorRooms = rooms.filter((r) => activeFloors.includes(r.floor_number));

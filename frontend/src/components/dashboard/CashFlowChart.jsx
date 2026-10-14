@@ -5,6 +5,7 @@ import { useRoomStore } from '../../stores/useRoomStore';
 import { usePeriodStore } from '../../stores/usePeriodStore';
 import { formatRupiah } from '../../utils/formatters';
 import { AlertCircle, HelpCircle, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { CashFlowChartSkeleton } from './DashboardSkeleton';
 
 gsap.registerPlugin(useGSAP);
 
@@ -16,12 +17,17 @@ export const CashFlowChart = () => {
   const rooms = useRoomStore((state) => state.rooms);
   const payments = useRoomStore((state) => state.payments);
   const activeFloors = useRoomStore((state) => state.activeFloors);
+  const roomsLoading = useRoomStore((state) => state.isLoading);
   const periods = usePeriodStore((state) => state.periods);
   const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
   const currentPeriod = usePeriodStore((state) => state.getCurrentPeriod());
+  const periodsLoading = usePeriodStore((state) => state.isLoading);
+
+  const isChartLoading = roomsLoading || periodsLoading || !currentPeriodId;
 
   // GSAP subtle rise animation for bars on mount and range switch
   useGSAP(() => {
+    if (isChartLoading) return;
     gsap.from('.cash-flow-bar', {
       scaleY: 0,
       transformOrigin: 'bottom',
@@ -30,7 +36,7 @@ export const CashFlowChart = () => {
       ease: 'power2.out',
       clearProps: 'transform'
     });
-  }, { dependencies: [selectedRange, payments], scope: chartSvgRef });
+  }, { dependencies: [selectedRange, payments, isChartLoading], scope: chartSvgRef });
 
   // Active rooms & unpaid count
   const activeRooms = rooms.filter((r) => activeFloors.includes(r.floor_number) && r.is_occupied);
@@ -99,6 +105,10 @@ export const CashFlowChart = () => {
       return { label, amount: perTotal };
     });
   }, [periods, payments]);
+
+  if (isChartLoading) {
+    return <CashFlowChartSkeleton />;
+  }
 
   const currentDataset = selectedRange === '6bln' ? monthlyData : weeklyData;
   const maxDatasetVal = Math.max(...currentDataset.map((d) => d.amount), 0);

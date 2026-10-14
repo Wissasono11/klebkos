@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useUIStore } from '../stores/useUIStore';
-import { Lock, Mail, ArrowRight, Eye, EyeOff, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Eye, EyeOff, ShieldCheck, AlertCircle, Clock } from 'lucide-react';
 import klebenganLogo from '../assets/klebengan.png';
 
 gsap.registerPlugin(useGSAP);
@@ -11,6 +11,7 @@ gsap.registerPlugin(useGSAP);
 export const LoginPage = () => {
   const containerRef = useRef(null);
   const login = useAuthStore((state) => state.login);
+  const sessionExpiredNotice = useAuthStore((state) => state.sessionExpiredNotice);
   const setActiveTab = useUIStore((state) => state.setActiveTab);
   const addToast = useUIStore((state) => state.addToast);
 
@@ -75,6 +76,14 @@ export const LoginPage = () => {
             Sistem Pencatatan Kas & Tagihan Kos Klebengan
           </p>
         </div>
+
+        {/* Session Expired Notice */}
+        {sessionExpiredNotice && !errorMessage && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
+            <Clock className="w-4 h-4 shrink-0 text-amber-600" />
+            <span>Sesi Anda telah berakhir karena tidak diakses selama 3 hari. Silakan masuk kembali.</span>
+          </div>
+        )}
 
         {/* Error Message Banner */}
         {errorMessage && (
@@ -174,6 +183,12 @@ export const LoginPage = () => {
                 </>
               )}
             </button>
+          </div>
+
+          {/* Security policy notice */}
+          <div className="pt-1 flex items-center justify-center gap-1.5 text-[10.5px] text-brand-text-muted">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>Sesi otomatis kedaluwarsa setelah 3 hari tanpa akses</span>
           </div>
         </form>
       </div>

@@ -4,6 +4,7 @@ import { Doughnut } from 'react-chartjs-2';
 import { useExpenseStore } from '../../stores/useExpenseStore';
 import { usePeriodStore } from '../../stores/usePeriodStore';
 import { formatRupiah } from '../../utils/formatters';
+import { ExpensePieChartSkeleton } from './DashboardSkeleton';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -31,7 +32,11 @@ const getCategoryColors = (count) => {
 
 export const ExpensePieChart = () => {
   const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
+  const periodsLoading = usePeriodStore((state) => state.isLoading);
   const expenses = useExpenseStore((state) => state.expenses);
+  const expensesLoading = useExpenseStore((state) => state.isLoading);
+
+  const isPieLoading = expensesLoading || periodsLoading || !currentPeriodId;
 
   const activeExpenses = expenses.filter((e) => e.period_id === currentPeriodId);
 
@@ -57,6 +62,10 @@ export const ExpensePieChart = () => {
   const sliceColors = useMemo(() => {
     return getCategoryColors(categories.length);
   }, [categories]);
+
+  if (isPieLoading) {
+    return <ExpensePieChartSkeleton />;
+  }
 
   const hasData = amounts.length > 0 && totalAmount > 0;
 

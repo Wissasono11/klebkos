@@ -21,20 +21,64 @@ import { LoginPage } from './pages/LoginPage';
 
 export default function App() {
   const activeTab = useUIStore((state) => state.activeTab);
+  const addToast = useUIStore((state) => state.addToast);
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const sessionExpiredNotice = useAuthStore((state) => state.sessionExpiredNotice);
+  const clearSessionNotice = useAuthStore((state) => state.clearSessionNotice);
+  const checkSessionExpiry = useAuthStore((state) => state.checkSessionExpiry);
+  const touchSession = useAuthStore((state) => state.touchSession);
+
   const currentPeriodId = usePeriodStore((state) => state.currentPeriodId);
   const loadPeriods = usePeriodStore((state) => state.loadPeriods);
   const loadRoomData = useRoomStore((state) => state.loadRoomData);
   const loadExpenses = useExpenseStore((state) => state.loadExpenses);
   const loadIncomes = useIncomeStore((state) => state.loadIncomes);
 
-  // Load initial data (periode & kamar) segera saat login
+  // Auto-logout jika website tidak diakses selama 3 hari
+  useEffect(() => {
+    // 1. Notifikasi jika sesi telah kedaluwarsa saat pertama kali dibuka
+    if (sessionExpiredNotice) {
+      addToast('Sesi Anda telah berakhir karena tidak diakses selama 3 hari. Silakan masuk kembali.', 'info');
+      clearSessionNotice();
+    }
+
+    // 2. Periksa sesi saat tab browser dibuka / diaktifkan kembali
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        checkSessionExpiry();
+      }
+    };
+
+    // 3. Perbarui waktu akses terakhir saat ada aktivitas pengguna
+    const handleActivity = () => {
+      touchSession();
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    window.addEventListener('click', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+
+    // 4. Heartbeat berkala tiap 15 menit untuk memantau batas waktu sesi
+    const interval = setInterval(() => {
+      checkSessionExpiry();
+    }, 15 * 60 * 1000);
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.removeEventListener('click', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      clearInterval(interval);
+    };
+  }, [sessionExpiredNotice, clearSessionNotice, checkSessionExpiry, touchSession, addToast]);
+
+  // Load periode saat login — data kamar/expense/income akan dimuat setelah periode aktif terisi
   useEffect(() => {
     if (isLoggedIn) {
       loadPeriods();
-      loadRoomData(currentPeriodId);
     }
-  }, [isLoggedIn, loadPeriods, loadRoomData]);
+  }, [isLoggedIn, loadPeriods]);
 
   // Load ulang data kamar, pengeluaran, dan pemasukan setiap kali periode aktif berganti
   useEffect(() => {

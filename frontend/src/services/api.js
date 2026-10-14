@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+const LOCAL_API_URL = 'http://localhost:5000/api/v1';
 const PROD_API_URL = 'https://klebkos-backend.bayuwicaksono782.workers.dev/api/v1';
 
 // Ambil URL dasar API: prioritaskan environment variable VITE_API_URL jika tersedia
@@ -8,11 +9,15 @@ const getBaseURL = () => {
   if (envUrl && envUrl.trim() !== '') {
     return envUrl.trim();
   }
+  if (import.meta?.env?.DEV) {
+    return LOCAL_API_URL;
+  }
   return PROD_API_URL;
 };
 
 export const api = axios.create({
   baseURL: getBaseURL(),
+  timeout: 8000,
   headers: {
     'Content-Type': 'application/json'
   }

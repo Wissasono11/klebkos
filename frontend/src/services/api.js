@@ -1,23 +1,29 @@
 import axios from 'axios';
 
-const LOCAL_API_URL = 'http://localhost:5000/api/v1';
 const PROD_API_URL = 'https://klebkos-backend.bayuwicaksono782.workers.dev/api/v1';
 
-// Ambil URL dasar API: prioritaskan environment variable VITE_API_URL jika tersedia
+// Ambil URL dasar API: env var → dev localhost → prod worker
 const getBaseURL = () => {
   const envUrl = import.meta?.env?.VITE_API_URL;
   if (envUrl && envUrl.trim() !== '') {
     return envUrl.trim();
   }
   if (import.meta?.env?.DEV) {
-    return LOCAL_API_URL;
+    return 'http://localhost:5000/api/v1';
   }
   return PROD_API_URL;
 };
 
+const baseURL = getBaseURL();
+
+// Peringatan jika env var tidak terdefinisi pada mode produksi
+if (import.meta?.env?.PROD && !import.meta?.env?.VITE_API_URL) {
+  console.warn('[KlebKos] VITE_API_URL tidak diset di environment produksi. Menggunakan fallback:', baseURL);
+}
+
 export const api = axios.create({
-  baseURL: getBaseURL(),
-  timeout: 8000,
+  baseURL,
+  timeout: 15000, // 15 detik — antisipasi cold start Cloudflare Workers
   headers: {
     'Content-Type': 'application/json'
   }
@@ -32,17 +38,14 @@ api.interceptors.request.use((config) => {
       token = session?.token;
     } catch (_) {}
   }
-  if (!token) {
-    token = 'demo-bendahara-token';
-  }
-
+  // ponytail: removed hardcoded 'demo-bendahara-token' — masks real auth failures
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Fallback otomatis: jika request ke localhost gagal karena server backend lokal tidak menyala, arahkan ke Cloudflare Workers
+// Fallback otomatis: jika request ke localhost gagal, arahkan ke Cloudflare Workers
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

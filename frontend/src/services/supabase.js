@@ -1,10 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  '';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// Validasi konfigurasi — peringatan jelas jika env var belum diset
+if (!supabaseUrl || !supabaseKey) {
+  console.warn(
+    '[KlebKos] Supabase belum terkonfigurasi:',
+    !supabaseUrl ? 'VITE_SUPABASE_URL kosong.' : '',
+    !supabaseKey ? 'VITE_SUPABASE_ANON_KEY kosong.' : '',
+    'Fitur direct-Supabase akan dinonaktifkan.'
+  );
+}
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 

@@ -1,25 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-// Muat .env jika di lingkungan lokal Node.js
-try {
-  if (typeof import.meta?.url === 'string' && import.meta.url.startsWith('file:')) {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-  }
-} catch (e) {
-  // Edge runtime ignores local file path
-}
-
-if (!process.env.SUPABASE_URL) {
-  try {
-    dotenv.config();
-  } catch (e) {}
-}
-
+// Muat .env sekali — server.js sudah memanggil dotenv.config() untuk Node lokal,
+// tapi di Cloudflare Workers env var datang dari wrangler secrets.
+try { dotenv.config(); } catch (_) {}
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
@@ -38,9 +22,4 @@ export const supabaseAdmin = isSupabaseConfigured
     })
   : null;
 
-// Client standard anon
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    })
-  : null;
+// ponytail: removed unused `supabase` (anon) export — every controller uses supabaseAdmin only

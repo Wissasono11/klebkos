@@ -104,7 +104,8 @@ export const TopHeader = () => {
                 <option value="">Memuat periode...</option>
               ) : (
                 periods.map((p) => {
-                  const isCurrent = p.period_name.toLowerCase().includes('september');
+                  const currentMonthName = new Date().toLocaleString('id-ID', { month: 'long' }).toLowerCase();
+                  const isCurrent = p.period_name.toLowerCase().includes(currentMonthName);
                   let tag = '';
                   if (p.is_closed) tag = ' • Arsip';
                   else if (isCurrent) tag = ' • Bulan Ini';

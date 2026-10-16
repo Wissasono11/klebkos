@@ -31,11 +31,7 @@ export const LoginPage = () => {
     });
   }, { scope: containerRef });
 
-  const handleUseDemo = () => {
-    setEmail('bendahara@klebengan.id');
-    setPassword('password123');
-    setErrorMessage('');
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,25 +143,7 @@ export const LoginPage = () => {
             </div>
           </div>
 
-          {/* Quick Demo Autofill Box */}
-          <div className="p-3 bg-brand-surface-2 border border-brand-border rounded-xl text-xs space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-brand-text-main flex items-center gap-1.5 text-[11px]">
-                <ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />
-                Akses Bendahara Kos
-              </span>
-              <button
-                type="button"
-                onClick={handleUseDemo}
-                className="text-[11px] font-bold text-brand-primary hover:text-brand-primary-hover hover:underline cursor-pointer"
-              >
-                Gunakan Akun Demo
-              </button>
-            </div>
-            <p className="text-[10.5px] text-brand-text-muted font-medium">
-              Demo: <span className="font-semibold text-brand-text-main">bendahara@klebengan.id</span> • Sandi: <span className="font-semibold text-brand-text-main">password123</span>
-            </p>
-          </div>
+
 
           {/* Submit Action */}
           <div className="pt-2">

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { useUIStore } from '../../stores/useUIStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { ShieldCheck, KeyRound } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export const LoginModal = () => {
   const isLoginModalOpen = useUIStore((state) => state.isLoginModalOpen);
@@ -11,8 +11,8 @@ export const LoginModal = () => {
 
   const login = useAuthStore((state) => state.login);
 
-  const [email, setEmail] = useState('bendahara@kaskos.id');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   if (!isLoginModalOpen) return null;
 
@@ -62,10 +62,7 @@ export const LoginModal = () => {
           />
         </div>
 
-        <div className="p-2.5 bg-brand-surface-2 rounded-xl text-[11px] text-brand-text-muted flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-brand-primary shrink-0" />
-          <span>Demo siap pakai: Cukup tekan tombol masuk.</span>
-        </div>
+
 
         <div className="flex gap-2 pt-2">
           <button
